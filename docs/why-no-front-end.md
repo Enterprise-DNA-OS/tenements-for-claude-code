@@ -1,24 +1,25 @@
 # Why there is no front end
 
-LandTracker is a database with a subscription. The tables underneath it are ordinary: a few entities, a few relationships, a handful of workflows you repeat every week. What you pay for is the layer on top that lets people who do not write SQL get at those tables. Screens, filters, dashboards, forms.
+A tenement register is a list of titles with dates and dollars on every row. When each was granted, who holds what share, what must be spent before the anniversary, when the rent and the Form 5 are due, when the term ends and which agreements put their own dates on the ground. That is a handful of tables. What tenement software charges for is the layer on top: screens, alerts, reports and a module for each job, so that people who do not write queries can get at the register.
 
-That layer used to be the whole product, because talking to a database was hard. It is not hard any more. Open this folder in Claude Code, describe what you want, and it writes the query, runs it, and explains the answer. Ask a question the dashboard never had a chart for and you still get an answer.
+That layer was the product because the database was hard to talk to. It is not hard any more. Open this folder in Claude Code and ask "what is late", "how much do we still have to spend on Lake Carey before the anniversaries" or "draft this quarter's tenement schedule". It runs the query, applies the rule and shows its working.
 
 ## What you gain
 
-- **Better answers.** A dashboard shows what the vendor decided to chart. Here you ask your own question, in your own words, and get it answered against your own data.
-- **No seats.** Everyone who needs to look can look. The bill does not grow with headcount.
-- **Your data in your Postgres.** Plain tables. Back them up, query them from anything, leave any time. There is no export step because there is nothing to leave.
-- **A process that matches you.** When your way of working changes, you add a command. You do not wait for a feature request to clear.
+- **Answers to your own questions.** A report shows what the vendor built. Here you ask, and the answer comes from your register with the rule behind each date.
+- **No seats.** The tenement manager, the geologists, the company secretary and the joint venture partner's accountant can all ask. The bill does not grow with headcount or tenement count.
+- **Your register in your database.** Plain tables you own. The record a buyer or a partner asks for in due diligence never sits in a system you rent.
+- **Rules you can read.** The Form 5, rent, exemption, surrender and expiry rules are rows in a table with their source. When the regulations change, you change a row.
 
-## What you give up
+## What you give up, honestly
 
-- **A visual board.** Stages are a table you ask about, not cards you drag.
+- **A map.** Boundaries, blocks and surrounding ground stay in the department's online map and your GIS. Enterprise DNA can connect a map when you want one.
+- **Automatic checks against the government register.** The free version reads the register export you download. A scheduled check against the register is a connection Enterprise DNA builds.
 - **A phone app.** It runs where Claude Code runs.
-- **A vendor help desk.** This is open source. Enterprise DNA supports the installed version for businesses that want someone to call.
+- **A vendor help desk.** This is open source. Enterprise DNA supports and runs the installed version for explorers that want someone to call.
 
 ## Who this fits
 
-Small teams who already use Claude Code, or who would rather learn to ask than learn another interface. If your team needs a screen to look at all day, keep LandTracker. If you need the answers more than the screens, this is cheaper, faster and yours.
+Junior explorers and tenement consultancies with someone who owns the register and would rather ask than click. If your team works in a map all day across several states and countries, keep your platform or have us build a map on this register. If you need the dates, the spend and the ASX schedule right, this is cheaper and yours.
 
 Installed and run for you: https://enterprisedna.co/omni/instead-of/landtracker

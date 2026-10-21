@@ -1,11 +1,73 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
-    "file": "name",
+    "name": "tenement-summary",
+    "title": "Tenement summary",
+    "for_each": "select id, ref from tenements order by ref",
+    "file": "ref",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      {
+        "title": "The tenement",
+        "sql": "select ref, type, project, status, location, applied_on as applied, granted_on as granted, expires_on as expires, ended_on as ended, area, area_unit, tenement_year from tenement_register where id = $1"
+      },
+      {
+        "title": "Holders",
+        "sql": "select h.name as holder, trim_scale(i.pct) || '%' as share, i.nature, i.from_on as from, i.to_on as to from interests i join holders h on h.id = i.holder_id where i.tenement_id = $1 order by i.from_on, i.pct desc"
+      },
+      {
+        "title": "Commitment and spend",
+        "sql": "select year_started, year_ends, commitment_cents as commitment, spent_this_year_cents as spent_this_year, spent_last_year_cents as spent_last_year from tenement_spend where id = $1"
+      },
+      {
+        "title": "Dates",
+        "sql": "select c.item, c.due_on as due, coalesce(c.done_on::text, 'open') as done from tenement_calendar c where c.tenement_id = $1 order by c.due_on"
+      },
+      {
+        "title": "Form 5s lodged",
+        "sql": "select year_ending, lodged_on, to_char(reported_cents / 100.0, 'FM999,999,990') as reported, receipt from form5_reports where tenement_id = $1 order by year_ending desc"
+      },
+      {
+        "title": "Conditions",
+        "sql": "select number, text from conditions where tenement_id = $1 order by number",
+        "note": "The record for the board, a joint venture partner or a buyer's due diligence. Check it against the department's register."
+      }
+    ]
+  },
+  {
+    "name": "project-expenditure",
+    "title": "Project expenditure statement",
+    "for_each": "select id, code from projects order by code",
+    "file": "code",
+    "sections": [
+      {
+        "title": "The project",
+        "sql": "select code, name, region, combined_reporting, manager from projects where id = $1"
+      },
+      {
+        "title": "Each tenement this year",
+        "sql": "select s.ref, s.year_started, s.year_ends, s.commitment_cents as commitment, s.spent_this_year_cents as spent from tenement_spend s join tenements t on t.id = s.id where t.project_id = $1 order by s.ref"
+      },
+      {
+        "title": "Spend by category, last 12 months",
+        "sql": "select c.name as category, to_char(sum(e.amount_cents) / 100.0, 'FM999,999,990') as spent, count(*)::int as entries from expenditure e join tenements t on t.id = e.tenement_id join expenditure_categories c on c.code = e.category where t.project_id = $1 and e.spent_on > current_date - 365 group by c.name order by sum(e.amount_cents) desc",
+        "note": "A working statement for a combined Form 5, a farm-in partner or the board. Keep the invoices behind each line."
+      }
+    ]
+  },
+  {
+    "name": "asx-schedule",
+    "title": "ASX quarterly tenement schedule",
+    "for_each": "select code as id, code from asx_quarters order by code",
+    "file": "code",
+    "sections": [
+      {
+        "title": "Tenements held at the end of the quarter",
+        "sql": "select t.ref as tenement, t.location, trim_scale(group_interest(t.id, q.starts_on - 1)) || '%' as interest_at_start, trim_scale(group_interest(t.id, q.ends_on)) || '%' as interest_at_end, case when t.granted_on is null or t.granted_on > q.ends_on then 'application' else 'granted' end as status from asx_quarters q cross join tenements t where q.code = $1 and coalesce(t.granted_on, t.applied_on) <= q.ends_on and (t.ended_on is null or t.ended_on > q.ends_on) and group_interest(t.id, q.ends_on) > 0 order by t.ref"
+      },
+      {
+        "title": "Tenements disposed of during the quarter",
+        "sql": "select t.ref as tenement, t.location, t.status, t.ended_on from asx_quarters q cross join tenements t where q.code = $1 and t.ended_on between q.starts_on and q.ends_on order by t.ref",
+        "note": "ASX Listing Rule 5.3.3. Check every line against the department's register before release."
+      }
     ]
   }
 ]

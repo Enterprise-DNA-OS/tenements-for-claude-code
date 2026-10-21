@@ -1,13 +1,51 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Tenements for Claude Code: what needs attention, rendered by npm run view",
+    "title": "Tenements this week",
+    "subtitle": "What needs a person, worst first. Read-only. Changes are made by asking Claude Code.",
     "sections": [
       {
         "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "sql": "select item, ref, project, owner, detail, due_on as due, days_left from attention_queue order by rank, due_on, ref"
+      },
+      {
+        "title": "Due in the next 30 days",
+        "sql": "select due_on as due, days_left, label as what, ref, project, manager as owner from open_dates where days_left between 0 and 30 order by due_on, ref"
+      }
+    ]
+  },
+  {
+    "name": "calendar",
+    "title": "The tenement calendar",
+    "subtitle": "Every open date for the next twelve months, with the rule behind it.",
+    "sections": [
+      {
+        "title": "Open dates",
+        "sql": "select due_on as due, days_left, label as what, ref, project, manager as owner, item as detail from open_dates where due_on <= current_date + 365 order by due_on, ref",
+        "note": "Form 5, rent, exemption, partial surrender and expiry dates come from each grant date and the rules table. Obligations come from your agreements and conditions."
+      },
+      {
+        "title": "Rule checks",
+        "sql": "select severity, rule, ref, finding from compliance_findings order by case severity when 'breach' then 0 else 1 end, rule, ref"
+      }
+    ]
+  },
+  {
+    "name": "spend",
+    "title": "Expenditure against commitment",
+    "subtitle": "This tenement year, by tenement and project.",
+    "sections": [
+      {
+        "title": "By tenement",
+        "sql": "select ref, project, year_ends, days_left_in_year as days_left, commitment_cents, spent_this_year_cents, greatest(coalesce(commitment_cents, 0) - spent_this_year_cents, 0) as still_to_spend_cents from tenement_spend order by days_left_in_year, ref"
+      },
+      {
+        "title": "By project",
+        "sql": "select coalesce(project, '(none)') as project, count(*)::int as tenements, sum(coalesce(commitment_cents, 0))::bigint as commitment_cents, sum(spent_this_year_cents)::bigint as spent_cents from tenement_spend group by project order by project"
+      },
+      {
+        "title": "Last year's shortfalls",
+        "sql": "select s.ref, s.year_started as year_ended, s.commitment_cents, s.spent_last_year_cents as spent_cents, x.lodged_on as exemption_lodged, x.outcome from tenement_spend s left join exemptions x on x.tenement_id = s.id and x.year_ending = s.year_started where s.last_year_started is not null and coalesce(s.commitment_cents, 0) > s.spent_last_year_cents order by s.ref"
       }
     ]
   }
